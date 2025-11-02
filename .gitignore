@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Ignore subdirectory that was moved to root
+/js-challenge-lab
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
