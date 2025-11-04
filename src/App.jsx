@@ -31,7 +31,15 @@ import {
   ClickAwayListener,
   Popper,
   Grow,
-  CircularProgress
+  CircularProgress,
+  useMediaQuery,
+  SwipeableDrawer,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  ListItemButton
 } from '@mui/material'
 import {
   DarkMode,
@@ -45,7 +53,8 @@ import {
   AutoAwesome,
   Terminal,
   MenuBook,
-  Shuffle
+  Shuffle,
+  Menu
 } from '@mui/icons-material'
 
 import { questions } from './data/questions'
@@ -220,6 +229,9 @@ function App() {
   const [showTopicInfo, setShowTopicInfo] = useState(false)
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' })
   
+  // Mobile state
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
+  
   // New state for database
   const [questionDatabase, setQuestionDatabase] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -341,6 +353,11 @@ function App() {
 
   // Get normalized difficulty for UI display
   const currentDifficulty = currentTopicQuestion ? normalizeDifficulty(currentTopicQuestion.difficulty) : 'easy'
+
+  // Mobile handlers
+  const toggleMobileDrawer = () => {
+    setMobileDrawerOpen(!mobileDrawerOpen)
+  }
 
   // Function to shuffle current questions
   const handleShuffleQuestions = () => {
@@ -768,6 +785,9 @@ function App() {
     },
   })
 
+  // Mobile detection
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+
   // Show loading state while database loads
   if (isLoading) {
     return (
@@ -810,33 +830,48 @@ function App() {
         }}
       >
         <Toolbar sx={{ minHeight: '64px' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mr: 3 }}>
-            <Code sx={{ mr: 2, color: '#1a73e8' }} />
+          {/* Mobile Menu Button - Hidden on Desktop */}
+          {isMobile && (
+            <IconButton
+              edge="start"
+              onClick={toggleMobileDrawer}
+              sx={{ 
+                mr: 2,
+                color: darkMode ? '#e8eaed' : '#5f6368'
+              }}
+              aria-label="menu"
+            >
+              <Menu />
+            </IconButton>
+          )}
+
+          <Box sx={{ display: 'flex', alignItems: 'center', mr: isMobile ? 1 : 3 }}>
+            <Code sx={{ mr: isMobile ? 1 : 2, color: '#1a73e8' }} />
             <Typography 
               variant="h5" 
               component="div" 
               sx={{ 
                 fontWeight: 400,
-                fontSize: '22px',
+                fontSize: isMobile ? '18px' : '22px',
                 color: darkMode ? '#e8eaed' : '#5f6368',
                 letterSpacing: '0',
               }}
             >
-              JS Learning Lab
+              {isMobile ? 'JS Lab' : 'JS Learning Lab'}
             </Typography>
           </Box>
           
           <Box sx={{ flexGrow: 1 }} />
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-            {/* Score and Streak - Google Style */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: isMobile ? 1 : 3 }}>
+            {/* Score and Streak - Responsive */}
             <Box sx={{ 
               display: 'flex', 
               alignItems: 'center', 
-              gap: 2,
+              gap: isMobile ? 1 : 2,
               backgroundColor: darkMode ? '#3c4043' : '#f8f9fa',
               borderRadius: '20px',
-              px: 2,
+              px: isMobile ? 1.5 : 2,
               py: 0.5,
             }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -937,18 +972,155 @@ function App() {
         </Toolbar>
       </AppBar>
 
+      {/* Mobile Navigation Drawer */}
+      <SwipeableDrawer
+        anchor="left"
+        open={mobileDrawerOpen}
+        onClose={() => setMobileDrawerOpen(false)}
+        onOpen={() => setMobileDrawerOpen(true)}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': {
+            width: '80%',
+            maxWidth: 320,
+            backgroundColor: darkMode ? '#292a2d' : '#f8f9fa',
+            borderRight: 1,
+            borderColor: darkMode ? '#3c4043' : '#e8eaed'
+          }
+        }}
+      >
+        <Box sx={{ p: 3 }}>
+          <Typography variant="h6" sx={{ 
+            mb: 3, 
+            fontWeight: 600,
+            color: darkMode ? '#e8eaed' : '#202124',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
+          }}>
+            <MenuBook sx={{ fontSize: 20, color: '#1a73e8' }} />
+            JavaScript Topics
+          </Typography>
+          
+          {/* Mobile Topic List */}
+          <List sx={{ p: 0 }}>
+            {topics.map((topic) => (
+              <ListItemButton
+                key={topic.id}
+                selected={activeTopic === topic.id}
+                onClick={() => {
+                  setActiveTopic(topic.id)
+                  setCurrentQuestionIndex(0)
+                  setSelectedAnswer(null)
+                  setShowResult(false)
+                  setMobileDrawerOpen(false)
+                }}
+                sx={{ 
+                  mb: 1,
+                  borderRadius: 2,
+                  backgroundColor: activeTopic === topic.id ? '#1a73e8' : 'transparent',
+                  color: activeTopic === topic.id ? '#ffffff' : (darkMode ? '#e8eaed' : '#202124'),
+                  '&:hover': {
+                    backgroundColor: activeTopic === topic.id ? '#1557b0' : (darkMode ? '#3c4043' : '#f1f3f4')
+                  },
+                  '&.Mui-selected': {
+                    backgroundColor: '#1a73e8',
+                    '&:hover': {
+                      backgroundColor: '#1557b0'
+                    }
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ 
+                  color: activeTopic === topic.id ? '#ffffff' : '#1a73e8',
+                  minWidth: 36 
+                }}>
+                  {topic.icon}
+                </ListItemIcon>
+                <ListItemText 
+                  primary={topic.name}
+                  primaryTypographyProps={{
+                    fontWeight: activeTopic === topic.id ? 600 : 400
+                  }}
+                />
+              </ListItemButton>
+            ))}
+          </List>
+
+          {/* Mobile Controls */}
+          <Box sx={{ mt: 4, pt: 3, borderTop: 1, borderColor: darkMode ? '#3c4043' : '#e8eaed' }}>
+            <Typography variant="subtitle2" sx={{ 
+              mb: 2, 
+              fontWeight: 600,
+              color: darkMode ? '#e8eaed' : '#202124'
+            }}>
+              Difficulty
+            </Typography>
+            
+            <FormControl fullWidth size="small" sx={{ mb: 3 }}>
+              <Select
+                value={selectedDifficulty}
+                onChange={(e) => setSelectedDifficulty(e.target.value)}
+                sx={{ 
+                  backgroundColor: darkMode ? '#3c4043' : '#ffffff',
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: darkMode ? '#5f6368' : '#dadce0'
+                  }
+                }}
+              >
+                <MenuItem value="all">All Levels</MenuItem>
+                <MenuItem value="easy">🟢 Easy</MenuItem>
+                <MenuItem value="medium">🟡 Medium</MenuItem>
+                <MenuItem value="hard">🔴 Hard</MenuItem>
+              </Select>
+            </FormControl>
+
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={() => {
+                handleShuffleQuestions()
+                setMobileDrawerOpen(false)
+              }}
+              startIcon={<Shuffle />}
+              sx={{ 
+                mb: 2,
+                textTransform: 'none',
+                borderColor: darkMode ? '#5f6368' : '#dadce0',
+                color: darkMode ? '#e8eaed' : '#202124'
+              }}
+            >
+              Shuffle Questions
+            </Button>
+
+            <IconButton
+              onClick={() => setDarkMode(!darkMode)}
+              sx={{ 
+                color: darkMode ? '#e8eaed' : '#5f6368',
+                backgroundColor: darkMode ? '#3c4043' : '#f1f3f4',
+                '&:hover': {
+                  backgroundColor: darkMode ? '#5f6368' : '#e8eaed'
+                }
+              }}
+            >
+              {darkMode ? <LightMode /> : <DarkMode />}
+            </IconButton>
+          </Box>
+        </Box>
+      </SwipeableDrawer>
+
       {/* Main Layout - Google Style */}
       <Box sx={{ 
         height: 'calc(100vh - 80px)', 
         display: 'flex',
         backgroundColor: darkMode ? '#202124' : '#ffffff',
       }}>
-        {/* Sidebar (Left full height) - Google Style */}
+        {/* Sidebar (Left full height) - Responsive */}
         <Paper 
           elevation={0}
           sx={{ 
             width: 280,
-            display: 'flex',
+            display: { xs: 'none', md: 'flex' }, // Hide on mobile
             flexDirection: 'column',
             borderRadius: 0,
             borderRight: 1,
@@ -1028,22 +1200,24 @@ function App() {
 
         {/* Main Content Area - Google Style */}
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          {/* Content (Top 60%) */}
+          {/* Content (Top 60%) - Responsive */}
           <Box sx={{ 
-            height: '60%', 
+            height: isMobile ? 'auto' : '60%', 
             display: 'flex', 
-            borderBottom: 1, 
+            flexDirection: isMobile ? 'column' : 'row',
+            borderBottom: isMobile ? 0 : 1, 
             borderColor: darkMode ? '#3c4043' : '#e8eaed',
           }}>
-            {/* Question (Left 50%) - Google Style */}
+            {/* Question (Left 50%) - Responsive */}
             <Paper 
               elevation={0}
               sx={{ 
-                width: '50%',
+                width: isMobile ? '100%' : '50%',
                 display: 'flex',
                 flexDirection: 'column',
                 borderRadius: 0,
-                borderRight: 1,
+                borderRight: isMobile ? 0 : 1,
+                borderBottom: isMobile ? 1 : 0,
                 borderColor: darkMode ? '#3c4043' : '#e8eaed',
                 backgroundColor: darkMode ? '#292a2d' : '#ffffff',
               }}
@@ -1171,29 +1345,37 @@ function App() {
                         Choose the correct output:
                       </Typography>
                       
-                      {/* Compact RadioGroup with 2x2 Grid Layout: A B / C D */}
+                      {/* 2x2 Grid Layout for Multiple Choice */}
                       <RadioGroup
                         value={selectedAnswer || ''}
                         onChange={(e) => handleAnswerSelect(e.target.value)}
                       >
-                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+                        <Box sx={{ 
+                          display: 'grid', 
+                          gridTemplateColumns: '1fr 1fr', 
+                          gap: isMobile ? 2 : 1 
+                        }}>
                           {getMultipleChoiceOptions(currentTopicQuestion).map((option) => (
                             <FormControlLabel
                               key={option.id}
                               value={option.id}
-                              control={<Radio size="small" />}
+                              control={<Radio size={isMobile ? "medium" : "small"} />}
                               label={
-                                <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.875rem' }}>
+                                <Typography variant="body2" sx={{ 
+                                  fontFamily: 'monospace', 
+                                  fontSize: isMobile ? '0.9rem' : '0.875rem'
+                                }}>
                                   {option.id}. {option.text}
                                 </Typography>
                               }
                               sx={{ 
                                 margin: 0,
-                                p: 1,
+                                p: isMobile ? 2 : 1,
                                 border: 1,
-                                borderRadius: 1,
+                                borderRadius: isMobile ? 2 : 1,
                                 borderColor: selectedAnswer === option.id ? 'primary.main' : 'divider',
                                 backgroundColor: selectedAnswer === option.id ? 'primary.light' : 'transparent',
+                                minHeight: isMobile ? 56 : 'auto',
                                 '&:hover': {
                                   borderColor: 'primary.main',
                                   backgroundColor: 'primary.light'
@@ -1259,11 +1441,11 @@ function App() {
               </Box>
             </Paper>
 
-            {/* Code Editor (Right 50%) - Google Style */}
+            {/* Code Editor (Right 50%) - Responsive */}
             <Paper 
               elevation={0}
               sx={{ 
-                width: '50%',
+                width: isMobile ? '100%' : '50%',
                 display: 'flex',
                 flexDirection: 'column',
                 borderRadius: 0,
@@ -1322,7 +1504,13 @@ function App() {
                 </Box>
               </Box>
               
-              <Box sx={{ flex: 1, overflow: 'hidden' }}>
+              <Box sx={{ 
+                flex: 1, 
+                overflow: 'hidden',
+                minHeight: isMobile ? '300px' : '400px',
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
                 <CodeEditor 
                   value={userCode}
                   onChange={setUserCode}
@@ -1332,17 +1520,22 @@ function App() {
             </Paper>
           </Box>
 
-          {/* Bottom Area (40%) */}
-          <Box sx={{ height: '40%', display: 'flex' }}>
-            {/* About Question (Left 50%) - Google Style */}
+          {/* Bottom Area (40%) - Responsive */}
+          <Box sx={{ 
+            height: isMobile ? 'auto' : '40%', 
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row'
+          }}>
+            {/* About Question (Left 50%) - Responsive */}
             <Paper 
               elevation={0}
               sx={{ 
-                width: '50%',
+                width: isMobile ? '100%' : '50%',
                 display: 'flex',
                 flexDirection: 'column',
                 borderRadius: 0,
-                borderRight: 1,
+                borderRight: isMobile ? 0 : 1,
+                borderBottom: isMobile ? 1 : 0,
                 borderColor: darkMode ? '#3c4043' : '#e8eaed',
                 backgroundColor: darkMode ? '#292a2d' : '#ffffff',
               }}
@@ -1616,11 +1809,11 @@ function App() {
               </Box>
             </Paper>
 
-            {/* Console (Right 50%) - Google Style */}
+            {/* Console (Right 50%) - Responsive */}
             <Paper 
               elevation={0}
               sx={{ 
-                width: '50%',
+                width: isMobile ? '100%' : '50%',
                 display: 'flex',
                 flexDirection: 'column',
                 borderRadius: 0,

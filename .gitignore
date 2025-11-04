@@ -15,6 +15,9 @@ dist-ssr
 # Ignore subdirectory that was moved to root
 /js-challenge-lab
 
+# Social media and documentation files
+SOCIAL_MEDIA_POST.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
