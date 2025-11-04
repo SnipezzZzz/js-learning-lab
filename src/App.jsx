@@ -459,9 +459,11 @@ function App() {
     setResult(null)
   }
 
-  const runCode = () => {
+  const runCode = async () => {
     try {
       const consoleOutput = []
+      const pendingTimeouts = []
+      
       const mockConsole = {
         log: (...args) => {
           consoleOutput.push(args.map(arg => 
@@ -470,16 +472,42 @@ function App() {
         }
       }
 
-      const func = new Function('console', userCode)
-      func(mockConsole)
+      // Mock setTimeout to handle async operations properly
+      const mockSetTimeout = (callback, delay) => {
+        const promise = new Promise(resolve => {
+          setTimeout(() => {
+            callback()
+            resolve()
+          }, delay)
+        })
+        pendingTimeouts.push(promise)
+        return pendingTimeouts.length // Return a fake timeout ID
+      }
 
-      const output = consoleOutput.join('\n')
-      const isCorrect = output === currentTopicQuestion.expectedOutput
+      const func = new Function('console', 'setTimeout', userCode)
+      func(mockConsole, mockSetTimeout)
 
+      // Wait for all setTimeout callbacks to complete
+      await Promise.all(pendingTimeouts)
+
+      // Join output - check if it should be comma-separated or newline-separated
+      const output = consoleOutput.length > 0 ? consoleOutput.join(', ') : ''
+      
+      // Also try newline format in case that's expected
+      const outputNewline = consoleOutput.length > 0 ? consoleOutput.join('\n') : ''
+      
+      // Use normalized question's expected output if available, fallback to currentTopicQuestion
+      const expectedOutput = normalizedQuestion?.expectedOutput || currentTopicQuestion.expectedOutput
+      
+      // Check both formats against expected output
+      const isCorrectComma = output === expectedOutput
+      const isCorrectNewline = outputNewline === expectedOutput
+      const isCorrect = isCorrectComma || isCorrectNewline
+      
       setResult({
-        output,
+        output: output || '(no output)',
         isCorrect,
-        expected: currentTopicQuestion.expectedOutput
+        expected: expectedOutput
       })
 
       if (isCorrect) {
@@ -509,12 +537,14 @@ function App() {
         normalizedError = 'SyntaxError'
       }
       
-      const isCorrect = normalizedError === currentTopicQuestion.expectedOutput
+      // Use normalized question's expected output if available, fallback to currentTopicQuestion
+      const expectedOutput = normalizedQuestion?.expectedOutput || currentTopicQuestion.expectedOutput
+      const isCorrect = normalizedError === expectedOutput
 
       setResult({
         output: errorOutput,
         isCorrect,
-        expected: currentTopicQuestion.expectedOutput
+        expected: expectedOutput
       })
 
       if (isCorrect) {
